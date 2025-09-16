@@ -35,7 +35,7 @@ cd discord-music-bot
 3. Run the bot using the run.sh script:
 
 ```bash
-./run.sh
+chmod +x run.sh && ./run.sh
 ```
 
 2. Add your discord bot token to the .env
