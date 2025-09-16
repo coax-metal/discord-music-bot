@@ -1,6 +1,6 @@
 # Discord Music Bot
 
-A simple Discord music bot that plays audio from YouTube.
+A simple Discord music bot that plays audio from YouTube and other sources in voice channels.
 
 ---
 
@@ -13,12 +13,31 @@ A simple Discord music bot that plays audio from YouTube.
 
 ---
 
-## Environment Variables
+## Prerequisites
 
-This project uses a `.env` file to store sensitive configuration like your Discord bot token.
+- **Python 3.11+** (if running locally)
+- **Discord Bot Token** (from [Discord Developer Portal](https://discord.com/developers/applications))
+- **FFmpeg** installed and accessible in PATH
+- **Docker** (required for containerized version)
+- **Git** (to clone the repository)
 
-1. The repository includes an `example.env` file.
-2. Copy it to create your own `.env` file:
+---
+
+## Installation
+
+1. Clone the repository:
 
 ```bash
-cp example.env .env
+git clone https://github.com/coax-metal/discord-music-bot.git
+cd discord-music-bot 
+```
+
+3. Run the bot using the run.sh script:
+
+```bash
+./run.sh
+```
+
+2. Add your discord bot token to the .env
+
+
