@@ -27,5 +27,5 @@ A simple Discord music bot that plays audio from YouTube and other sources in vo
 1. Clone the repository:
 
 ```bash
-git clone https://github.com/<your-username>/discord-music-bot.git
+git clone https://github.com/coax-metal/discord-music-bot.git
 cd discord-music-bot
