@@ -8,21 +8,23 @@ if [ ! -f .env ]; then
     echo ".env file created from example.env."
 fi
 
-# Step 2: Prompt for token
+# Step 2: Prompt for bot token
 read -p "Enter your Discord bot token: " TOKEN
 if [ -z "$TOKEN" ]; then
     echo "Error: Token cannot be empty."
     exit 1
 fi
 
-# Step 3: Ensure token is on its own line
-# Remove any existing DISCORD_TOKEN line
-sed -i '/^DISCORD_TOKEN=/d' .env
+# Step 3: Replace BOT_TOKEN in .env or add it if missing
+if grep -q "^BOT_TOKEN=" .env; then
+    sed -i "s|^BOT_TOKEN=.*|BOT_TOKEN=$TOKEN|" .env
+else
+    # Ensure file ends with newline before appending
+    tail -c1 .env | read -r _ || echo "" >> .env
+    echo "BOT_TOKEN=$TOKEN" >> .env
+fi
 
-# Append new token
-echo "DISCORD_TOKEN=$TOKEN" >> .env
-
-echo ".env updated safely with your token."
+echo ".env updated with your token."
 
 # Step 4: Build Docker image
 docker build -t discord-music-bot .
