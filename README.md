@@ -32,12 +32,12 @@ git clone https://github.com/coax-metal/discord-music-bot.git
 cd discord-music-bot 
 ```
 
-3. Run the bot using the run.sh script:
+2. Run the bot using the run.sh script:
 
 ```bash
 chmod +x run.sh && ./run.sh
 ```
 
-2. Add your discord bot token to the .env
+3. Add your discord bot token in the terminal
 
 
