@@ -13,5 +13,8 @@ COPY bot.py requirements.txt /app/
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
+# Ensure yt-dlp is installed as latest version
+RUN pip install --no-cache-dir --upgrade yt-dlp
+
 # Run bot
 CMD ["python", "bot.py"]

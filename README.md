@@ -32,6 +32,8 @@ git clone https://github.com/coax-metal/discord-music-bot.git
 cd discord-music-bot 
 ```
 
+2. 
+
 2. Run the bot using the run.sh script:
 
 ```bash
