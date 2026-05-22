@@ -78,6 +78,8 @@ GUILD_ID=your-discord-server-id
 UPDATE_YTDLP_ON_START=true
 ```
 
+`BOT_TOKEN` also works as an alias for `DISCORD_TOKEN`, but only set one of them.
+
 Then build the image:
 
 ```bash
@@ -93,6 +95,7 @@ Now add it in the normal Unraid Docker UI:
 5. Set **Network Type** to `bridge`.
 6. Add these environment variables:
    - `DISCORD_TOKEN`: your Discord bot token
+   - `BOT_TOKEN`: optional alias for `DISCORD_TOKEN`; leave blank if using `DISCORD_TOKEN`
    - `GUILD_ID`: your Discord server ID, optional but recommended
    - `UPDATE_YTDLP_ON_START`: `true`
    - `YTDLP_COOKIES_FILE`: optional, usually blank

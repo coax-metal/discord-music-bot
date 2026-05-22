@@ -13,7 +13,7 @@ from discord.ext import commands
 
 
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO").upper()
-DISCORD_TOKEN = os.getenv("DISCORD_TOKEN")
+DISCORD_TOKEN = os.getenv("DISCORD_TOKEN") or os.getenv("BOT_TOKEN")
 GUILD_ID = os.getenv("GUILD_ID")
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE")
 
@@ -362,7 +362,7 @@ async def on_app_command_error(
 
 def main() -> None:
     if not DISCORD_TOKEN:
-        raise SystemExit("DISCORD_TOKEN is required.")
+        raise SystemExit("DISCORD_TOKEN is required. BOT_TOKEN also works as an alias.")
     bot.run(DISCORD_TOKEN)
 
 
