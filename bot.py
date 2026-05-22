@@ -39,6 +39,7 @@ class Track:
     stream_url: str
     requested_by: str
     duration: Optional[int] = None
+    announce_on_play: bool = True
 
     @property
     def duration_text(self) -> str:
@@ -135,7 +136,7 @@ class GuildPlayer:
             )
             voice.play(source, after=after_playback)
 
-            if self.text_channel:
+            if self.text_channel and track.announce_on_play:
                 await self.text_channel.send(
                     f"Now playing: **{track.title}** `{track.duration_text}`"
                 )
@@ -306,11 +307,17 @@ async def play(interaction: discord.Interaction, query: str) -> None:
         return
 
     player = bot.player_for(guild_id)
+    starts_now = not player.current and not voice.is_playing() and not voice.is_paused()
     position = await player.add(track, interaction.channel)
     logger.info("Queued %s at position %s in guild %s", track.title, position, guild_id)
 
-    if not voice.is_playing() and not voice.is_paused():
+    if starts_now:
+        track.announce_on_play = False
         player.next_track.set()
+        await interaction.followup.send(
+            f"Playing: **{track.title}** `{track.duration_text}`"
+        )
+        return
 
     await interaction.followup.send(
         f"Queued: **{track.title}** `{track.duration_text}` at position `{position}`"
