@@ -240,6 +240,7 @@ def refresh_track_stream_sync(track: Track) -> Track:
         stream_url=stream_url,
         requested_by=track.requested_by,
         duration=info.get("duration") or track.duration,
+        announce_on_play=track.announce_on_play,
     )
 
 
