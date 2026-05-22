@@ -4,6 +4,8 @@ A lightweight Discord music bot that streams audio with `yt-dlp` and `ffmpeg`.
 
 It updates `yt-dlp` every time the container starts, so normal restarts pick up the newest extractor fixes without rebuilding the image.
 
+Playback prefers YouTube's Opus audio streams and sends Opus to Discord through `ffmpeg`, falling back to the best available audio stream when Opus is not available.
+
 ## Commands
 
 - `/play <url or search>`: queue a YouTube URL or search result

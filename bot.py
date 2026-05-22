@@ -21,7 +21,7 @@ FFMPEG_BEFORE_OPTIONS = (
     "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 "
     "-nostdin"
 )
-FFMPEG_OPTIONS = "-vn -bufsize 64k"
+FFMPEG_OPTIONS = "-vn -bufsize 64k -application audio"
 
 URL_PATTERN = re.compile(r"^https?://", re.IGNORECASE)
 
@@ -128,7 +128,7 @@ class GuildPlayer:
                     logger.warning("Playback error: %s", error)
                 self.bot.loop.call_soon_threadsafe(done.set)
 
-            source = discord.FFmpegPCMAudio(
+            source = discord.FFmpegOpusAudio(
                 track.stream_url,
                 before_options=FFMPEG_BEFORE_OPTIONS,
                 options=FFMPEG_OPTIONS,
@@ -171,7 +171,7 @@ bot = MusicBot()
 
 def ytdlp_options() -> dict:
     options = {
-        "format": "bestaudio/best",
+        "format": "bestaudio[acodec=opus]/bestaudio/best",
         "quiet": True,
         "default_search": "ytsearch1",
         "noplaylist": True,
