@@ -263,10 +263,20 @@ async def ensure_voice(interaction: discord.Interaction) -> discord.VoiceClient:
 
     voice = interaction.guild.voice_client
     if voice and voice.channel != voice_state.channel:
+        logger.info(
+            "Moving to voice channel %s in guild %s",
+            voice_state.channel,
+            interaction.guild_id,
+        )
         await voice.move_to(voice_state.channel)
         return voice
     if voice:
         return voice
+    logger.info(
+        "Connecting to voice channel %s in guild %s",
+        voice_state.channel,
+        interaction.guild_id,
+    )
     return await voice_state.channel.connect(self_deaf=True)
 
 
@@ -278,6 +288,12 @@ async def on_ready() -> None:
 @bot.tree.command(name="play", description="Play a YouTube URL or search.")
 @app_commands.describe(query="YouTube URL or search terms")
 async def play(interaction: discord.Interaction, query: str) -> None:
+    logger.info(
+        "/play received from %s in guild %s: %s",
+        interaction.user,
+        interaction.guild_id,
+        query,
+    )
     await interaction.response.defer(thinking=True)
     voice = await ensure_voice(interaction)
     guild_id = require_guild_id(interaction)
@@ -291,6 +307,7 @@ async def play(interaction: discord.Interaction, query: str) -> None:
 
     player = bot.player_for(guild_id)
     position = await player.add(track, interaction.channel)
+    logger.info("Queued %s at position %s in guild %s", track.title, position, guild_id)
 
     if not voice.is_playing() and not voice.is_paused():
         player.next_track.set()
