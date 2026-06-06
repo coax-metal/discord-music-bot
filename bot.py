@@ -18,10 +18,10 @@ GUILD_ID = os.getenv("GUILD_ID")
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE")
 
 FFMPEG_BEFORE_OPTIONS = (
-    "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 "
+    "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 "
     "-nostdin"
 )
-FFMPEG_OPTIONS = "-vn -bufsize 64k -application audio"
+FFMPEG_OPTIONS = "-vn -bufsize 512k -application audio"
 
 URL_PATTERN = re.compile(r"^https?://", re.IGNORECASE)
 
