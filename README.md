@@ -1,103 +1,93 @@
 # Discord Music Bot
 
-A lightweight Discord music bot that streams audio with `yt-dlp` and `ffmpeg`.
+A lightweight Discord music bot that plays YouTube audio with high-quality streaming.
 
-It updates `yt-dlp` every time the container starts, so normal restarts pick up the newest extractor fixes without rebuilding the image.
+## Features
 
-Playback prefers YouTube's Opus audio streams and sends Opus to Discord through `ffmpeg`, falling back to the best available audio stream when Opus is not available.
+- Stream YouTube videos or search results directly to Discord voice channels
+- Minimal latency and smooth playback with optimized buffering
+- Supports live streams and playlists
+- Simple slash commands for easy control
 
 ## Commands
 
-- `/play <url or search>`: queue a YouTube URL or search result
-- `/queue`: show the current track and upcoming tracks
-- `/skip`: skip the current track
-- `/pause`: pause playback
-- `/resume`: resume playback
-- `/stop`: clear the queue and disconnect
+- `/play <url or search>`: Play a YouTube URL or search for a song
+- `/queue`: Show what's currently playing and upcoming tracks
+- `/skip`: Skip the current track
+- `/pause`: Pause playback
+- `/resume`: Resume playback
+- `/stop`: Stop playback and disconnect from the voice channel
 
-## Discord Setup
+## Setup
 
-1. Create an application at the Discord Developer Portal.
-2. Add a bot user and copy the bot token.
-3. Enable these OAuth2 scopes when inviting it:
-   - `bot`
-   - `applications.commands`
-4. Enable these bot permissions:
-   - `Connect`
-   - `Speak`
-   - `Use Voice Activity`
-   - `Send Messages`
-   - `Use Slash Commands`
+### 1. Discord Bot Setup
 
-For easiest first setup, put your Discord server ID in `GUILD_ID`. Slash commands usually appear immediately for that server. Without `GUILD_ID`, commands are global and Discord can take a while to show them.
+1. Go to the [Discord Developer Portal](https://discord.com/developers/applications)
+2. Click **New Application** and give it a name
+3. Go to the **Bot** tab and click **Add Bot**
+4. Under **TOKEN**, click **Copy** to copy your bot token (keep this secret!)
+5. Go to **OAuth2** → **URL Generator**
+6. Select scopes: `bot` and `applications.commands`
+7. Select permissions: `Connect`, `Speak`, `Use Voice Activity`, `Send Messages`, `Use Slash Commands`
+8. Copy the generated URL and open it in your browser to invite the bot to your server
 
-## Local Run
+### 2. Installation on Unraid
+
+1. Open a terminal on your Unraid server
+2. Clone the repository:
+   ```bash
+   cd /mnt/user/appdata
+   git clone https://github.com/coax-metal/discord-music-bot.git
+   cd discord-music-bot
+   ```
+
+3. Create a `.env` file with your settings:
+   ```bash
+   cp .env.example .env
+   ```
+
+4. Edit `.env` and set:
+   ```
+   DISCORD_TOKEN=your-bot-token-here
+   GUILD_ID=your-server-id-here
+   ```
+   - Find your server ID: Enable Developer Mode in Discord settings, right-click your server, and copy the ID
+   - `GUILD_ID` is optional but commands appear faster with it
+
+5. In Unraid Docker UI:
+   - Click **Add Container**
+   - Set **Name** to `discord-music-bot`
+   - Set **Repository** to `discord-music-bot:latest`
+   - Set **Network Type** to `bridge`
+   - Click **Add another Path, Port, Variable, Label or Device** and add your environment file:
+     - **Config Type**: `Variable`
+     - **Name**: `DISCORD_TOKEN`
+     - **Value**: Your bot token
+   - Click **Apply**
+
+6. The container will build and start automatically
+
+### 3. Local Testing (Docker)
 
 ```bash
 cp .env.example .env
-# edit .env and set DISCORD_TOKEN
+# Edit .env with your bot token
 docker build -t discord-music-bot:latest .
 docker run --rm --env-file .env discord-music-bot:latest
 ```
 
-## Publish To GitHub
+## Updating
 
-From this folder on your development machine:
-
-```bash
-git init
-git add .
-git commit -m "Initial Discord music bot"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/discord-music-bot.git
-git push -u origin main
-```
-
-Create the empty GitHub repo first at:
-
-```text
-https://github.com/new
-```
-
-Use `discord-music-bot` as the repo name. Do not commit `.env` or anything in `cookies/`; both are ignored.
-
-## Unraid Install
-
-Install from GitHub on your Unraid server:
+To update to the latest version:
 
 ```bash
-cd /mnt/user/appdata
-git clone https://github.com/YOUR_USERNAME/discord-music-bot.git
-cd discord-music-bot
-cp .env.example .env
+cd /mnt/user/appdata/discord-music-bot
+git pull
+docker-compose down
+docker-compose up -d --build
 ```
 
-Edit `.env` and set at least:
-
-```text
-DISCORD_TOKEN=your-real-token
-GUILD_ID=your-discord-server-id
-UPDATE_YTDLP_ON_START=true
-```
-
-`BOT_TOKEN` also works as an alias for `DISCORD_TOKEN`, but only set one of them.
-
-Then build the image:
-
-```bash
-docker build -t discord-music-bot:latest .
-```
-
-Now add it in the normal Unraid Docker UI:
-
-1. Go to **Docker**.
-2. Click **Add Container**.
-3. Set **Name** to `discord-music-bot`.
-4. Set **Repository** to `discord-music-bot:latest`.
-5. Set **Network Type** to `bridge`.
-6. Add these environment variables:
-   - `DISCORD_TOKEN`: your Discord bot token
-   - `BOT_TOKEN`: optional alias for `DISCORD_TOKEN`; leave blank if using `DISCORD_TOKEN`
+Or in Unraid Docker UI, find the container and click **Force Update**.
    - `GUILD_ID`: your Discord server ID, optional but recommended
    - `UPDATE_YTDLP_ON_START`: `true`
    - `YTDLP_COOKIES_FILE`: optional, usually blank
