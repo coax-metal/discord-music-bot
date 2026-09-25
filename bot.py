@@ -166,7 +166,7 @@ class GuildPlayer:
 
                 self.bot.loop.call_soon_threadsafe(done.set)
 
-            source = discord.FFmpegOpusAudio(
+            source = discord.FFmpegPCMAudio(
                 track.stream_url,
                 before_options=FFMPEG_BEFORE_OPTIONS,
                 options=FFMPEG_OPTIONS,
