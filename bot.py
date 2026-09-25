@@ -17,11 +17,14 @@ DISCORD_TOKEN = os.getenv("DISCORD_TOKEN") or os.getenv("BOT_TOKEN")
 GUILD_ID = os.getenv("GUILD_ID")
 YTDLP_COOKIES_FILE = os.getenv("YTDLP_COOKIES_FILE")
 
+# High-fidelity audio configurations using the SoX high-end resampler engine
 FFMPEG_BEFORE_OPTIONS = (
-    "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 2 "
+    "-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5 "
     "-nostdin"
 )
-FFMPEG_OPTIONS = "-vn -bufsize 512k -application audio"
+FFMPEG_OPTIONS = (
+    '-vn -bufsize 512k -af "aresample=resampler=soxr:osr=48000:dither_method=triangular"'
+)
 
 URL_PATTERN = re.compile(r"^https?://", re.IGNORECASE)
 
@@ -259,136 +262,14 @@ async def ensure_voice(interaction: discord.Interaction) -> discord.VoiceClient:
         raise app_commands.AppCommandError("This command only works in a server.")
 
     user = interaction.user
-    voice_state = getattr(user, "voice", None)
-    if not voice_state or not voice_state.channel:
-        raise app_commands.AppCommandError("Join a voice channel first.")
+    if not user.voice or not user.voice.channel:
+        raise app_commands.AppCommandError("You must be in a voice channel.")
 
-    voice = interaction.guild.voice_client
-    if voice and voice.channel != voice_state.channel:
-        logger.info(
-            "Moving to voice channel %s in guild %s",
-            voice_state.channel,
-            interaction.guild_id,
-        )
-        await voice.move_to(voice_state.channel)
-        return voice
-    if voice:
-        return voice
-    logger.info(
-        "Connecting to voice channel %s in guild %s",
-        voice_state.channel,
-        interaction.guild_id,
-    )
-    return await voice_state.channel.connect(self_deaf=True)
+    if interaction.guild.voice_client:
+        return interaction.guild.voice_client
 
+    return await user.voice.channel.connect()
 
-@bot.event
-async def on_ready() -> None:
-    logger.info("Logged in as %s", bot.user)
-
-
-@bot.tree.command(name="play", description="Play a YouTube URL or search.")
-@app_commands.describe(query="YouTube URL or search terms")
-async def play(interaction: discord.Interaction, query: str) -> None:
-    logger.info(
-        "/play received from %s in guild %s: %s",
-        interaction.user,
-        interaction.guild_id,
-        query,
-    )
-    await interaction.response.defer(thinking=True)
-    voice = await ensure_voice(interaction)
-    guild_id = require_guild_id(interaction)
-
-    try:
-        track = await extract_track(query, interaction.user.display_name)
-    except Exception as exc:
-        logger.exception("yt-dlp failed")
-        await interaction.followup.send(f"I couldn't play that: `{exc}`")
-        return
-
-    player = bot.player_for(guild_id)
-    starts_now = not player.current and not voice.is_playing() and not voice.is_paused()
-    position = await player.add(track, interaction.channel)
-    logger.info("Queued %s at position %s in guild %s", track.title, position, guild_id)
-
-    if starts_now:
-        track.announce_on_play = False
-        player.next_track.set()
-        await interaction.followup.send(
-            f"Playing: **{track.title}** `{track.duration_text}`"
-        )
-        return
-
-    await interaction.followup.send(
-        f"Queued: **{track.title}** `{track.duration_text}` at position `{position}`"
-    )
-
-
-@bot.tree.command(name="skip", description="Skip the current track.")
-async def skip(interaction: discord.Interaction) -> None:
-    player = bot.player_for(require_guild_id(interaction))
-    skipped = await player.skip()
-    await interaction.response.send_message("Skipped." if skipped else "Nothing is playing.")
-
-
-@bot.tree.command(name="pause", description="Pause playback.")
-async def pause(interaction: discord.Interaction) -> None:
-    voice = interaction.guild.voice_client if interaction.guild else None
-    if voice and voice.is_playing():
-        voice.pause()
-        await interaction.response.send_message("Paused.")
-    else:
-        await interaction.response.send_message("Nothing is playing.")
-
-
-@bot.tree.command(name="resume", description="Resume playback.")
-async def resume(interaction: discord.Interaction) -> None:
-    voice = interaction.guild.voice_client if interaction.guild else None
-    if voice and voice.is_paused():
-        voice.resume()
-        await interaction.response.send_message("Resumed.")
-    else:
-        await interaction.response.send_message("Nothing is paused.")
-
-
-@bot.tree.command(name="stop", description="Stop playback, clear the queue, and leave.")
-async def stop(interaction: discord.Interaction) -> None:
-    player = bot.player_for(require_guild_id(interaction))
-    await player.stop()
-    await interaction.response.send_message("Stopped and disconnected.")
-
-
-@bot.tree.command(name="queue", description="Show what is playing and next.")
-async def queue(interaction: discord.Interaction) -> None:
-    player = bot.player_for(require_guild_id(interaction))
-    lines = []
-    if player.current:
-        lines.append(f"Playing: **{player.current.title}** `{player.current.duration_text}`")
-    if player.queue:
-        for index, track in enumerate(list(player.queue)[:10], start=1):
-            lines.append(f"{index}. **{track.title}** `{track.duration_text}`")
-    if not lines:
-        lines.append("The queue is empty.")
-    await interaction.response.send_message("\n".join(lines))
-
-
-@bot.tree.error
-async def on_app_command_error(
-    interaction: discord.Interaction,
-    error: app_commands.AppCommandError,
-) -> None:
-    message = str(error) or "Something went wrong."
-    if interaction.response.is_done():
-        await interaction.followup.send(message)
-    else:
-        await interaction.response.send_message(message, ephemeral=True)
-
-
-def main() -> None:
-    if not DISCORD_TOKEN:
-        raise SystemExit("DISCORD_TOKEN is required. BOT_TOKEN also works as an alias.")
-    bot.run(DISCORD_TOKEN)
 
 
 if __name__ == "__main__":
