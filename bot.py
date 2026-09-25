@@ -273,4 +273,6 @@ async def ensure_voice(interaction: discord.Interaction) -> discord.VoiceClient:
 
 
 if __name__ == "__main__":
-    main()
+    if not DISCORD_TOKEN:
+        raise RuntimeError("DISCORD_TOKEN is not set")
+    bot.run(DISCORD_TOKEN)
