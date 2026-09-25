@@ -23,9 +23,10 @@ FFMPEG_BEFORE_OPTIONS = (
 )
 
 FFMPEG_OPTIONS = (
-    '-vn -bufsize 512k '
+    '-vn -acodec pcm_s16le -ar 48000 -ac 2 -bufsize 512k '
     '-af "aresample=resampler=soxr:osr=48000:dither_method=triangular"'
 )
+
 
 URL_PATTERN = re.compile(r"^https?://", re.IGNORECASE)
 
